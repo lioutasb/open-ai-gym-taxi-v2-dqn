@@ -36,8 +36,8 @@ MEMORY = 50000
 BATCH_SIZE = 128
 GAMMA = 0.999
 EPS_END = 0.01
-MAX_EPISODE = 10
-TARGET_UPDATE = 10
+MAX_EPISODE = 3
+TARGET_UPDATE = 2
 HIDDEN_DIM = 64
 N_ACTIONS = env.action_space.n
 N_STATES = env.observation_space.n
@@ -238,7 +238,7 @@ for i_episode in range(NUM_EPISODES):
         t += 1
         if done:
             episode_durations.append(t)
-            plot_durations()
+            # plot_durations()
 
     score += total_reward
     perf = score/(i_episode + 1)
