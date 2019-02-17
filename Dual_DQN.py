@@ -35,6 +35,7 @@ NUM_EPISODES = 5000
 MEMORY = 50000
 BATCH_SIZE = 128
 GAMMA = 0.999
+EPS_START = 0.9
 EPS_END = 0.01
 MAX_EPISODE = 3
 TARGET_UPDATE = 2
@@ -181,11 +182,11 @@ def optimize_model():
     loss.backward()
     optim.step()
 
-def epsilon_annealing(epsiode, max_episode, min_eps):
+def epsilon_annealing(episode, max_episode, min_eps, max_eps):
     if max_episode == 0:
         return min_eps
-    slope = (min_eps - 1.0) / max_episode
-    return max(slope * epsiode + 1.0, min_eps)
+    slope = (min_eps - max_eps) / max_episode
+    return max(slope * episode + max_eps, min_eps)
 
 def clear_screen(delay=1):
     time.sleep(delay)
@@ -217,7 +218,7 @@ for i_episode in range(NUM_EPISODES):
     clear_screen(0)
     state = env.reset()
     total_reward = 0
-    eps = epsilon_annealing(i_episode, MAX_EPISODE, EPS_END)
+    eps = epsilon_annealing(i_episode, MAX_EPISODE, EPS_END, EPS_START)
     done = False
     t = 0
     log_progress(env, delay=0.5, message=init_message(i_episode, perf), eps=eps)
