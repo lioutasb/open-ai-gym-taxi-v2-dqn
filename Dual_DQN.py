@@ -124,7 +124,6 @@ def get_action(state, eps):
     else:
         policy_net.train(mode=False)
         scores = get_Q(policy_net, state)
-        print(scores)
         _, argmax = torch.max(scores.data, 1)
         return int(argmax.cpu().numpy())
 
@@ -162,16 +161,17 @@ def optimize_model():
     next_states = np.vstack([x.next_state for x in transitions])
     done = np.array([x.done for x in transitions])
 
-    # Q_predict = get_Q(policy_net, states)
-    # Q_target = Q_predict.clone().data.cpu().numpy()
-    # Q_target[np.arange(len(Q_target)), actions] = rewards + GAMMA * np.max(get_Q(target_net, next_states).data.cpu().numpy(), axis=1) * ~done
-    # Q_target = to_variable(Q_target)
-
     Q_predict = get_Q(policy_net, states)
-
-    Q_next_state = np.argmax(get_Q(policy_net, next_states).data.cpu().numpy(), axis=1).reshape(-1)
+    
     Q_target = Q_predict.clone().data.cpu().numpy()
+
+    # For DQN
+    # Q_target[np.arange(len(Q_target)), actions] = rewards + GAMMA * np.max(get_Q(target_net, next_states).data.cpu().numpy(), axis=1) * ~done
+
+    # For Double DQN
+    Q_next_state = np.argmax(get_Q(policy_net, next_states).data.cpu().numpy(), axis=1).reshape(-1)
     Q_target[np.arange(len(Q_target)), actions] = rewards + GAMMA * np.choose(Q_next_state, get_Q(target_net, next_states).data.cpu().numpy().T) * ~done
+
     Q_target = to_variable(Q_target, type=torch.float)
 
 
