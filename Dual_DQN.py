@@ -36,7 +36,7 @@ MEMORY = 50000
 BATCH_SIZE = 128
 GAMMA = 0.999
 EPS_END = 0.01
-MAX_EPISODE = 50
+MAX_EPISODE = 10
 TARGET_UPDATE = 10
 HIDDEN_DIM = 64
 N_ACTIONS = env.action_space.n
@@ -182,6 +182,8 @@ def optimize_model():
     optim.step()
 
 def epsilon_annealing(epsiode, max_episode, min_eps):
+    if max_episode == 0:
+        return min_eps
     slope = (min_eps - 1.0) / max_episode
     return max(slope * epsiode + 1.0, min_eps)
 
@@ -189,12 +191,13 @@ def clear_screen(delay=1):
     time.sleep(delay)
     os.system('clear')
 
-def log_progress(env, reward=0, total_reward=0, delay=None, message=None):
+def log_progress(env, reward=0, total_reward=0, delay=None, message=None, eps=0):
     if type(message) is str:
         print(message)
     env.render()
     print('Reward:', reward)
     print('Cumulative reward', total_reward)
+    print('ε-greedy probability', eps)
     clear_screen(delay)
 
 def init_message(attempt, perf):
@@ -213,16 +216,16 @@ score  = 0
 for i_episode in range(NUM_EPISODES):
     clear_screen(0)
     state = env.reset()
-    log_progress(env, delay=0.5, message=init_message(i_episode, perf))
     total_reward = 0
     eps = epsilon_annealing(i_episode, MAX_EPISODE, EPS_END)
     done = False
     t = 0
+    log_progress(env, delay=0.5, message=init_message(i_episode, perf), eps=eps)
     while not done:
         action = get_action(state, eps)
         next_state, reward, done, _ = env.step(action)
         total_reward += reward
-        log_progress(env, reward=reward, total_reward=total_reward, delay=0.5,message=perf_message(i_episode, perf))
+        log_progress(env, reward=reward, total_reward=total_reward, delay=0.5,message=perf_message(i_episode, perf), eps=eps)
 
         if done:
             reward = -1
