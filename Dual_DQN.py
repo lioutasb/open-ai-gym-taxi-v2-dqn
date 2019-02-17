@@ -37,8 +37,8 @@ BATCH_SIZE = 128
 GAMMA = 0.999
 EPS_START = 0.9
 EPS_END = 0.01
-MAX_EPISODE = 10
-TARGET_UPDATE = 2
+MAX_EPISODE = 70
+TARGET_UPDATE = 10
 HIDDEN_DIM = 64
 N_ACTIONS = env.action_space.n
 N_STATES = env.observation_space.n
@@ -226,7 +226,9 @@ for i_episode in range(NUM_EPISODES):
         action = get_action(state, eps)
         next_state, reward, done, _ = env.step(action)
         total_reward += reward
-        log_progress(env, reward=reward, total_reward=total_reward, delay=0.5,message=perf_message(i_episode, perf), eps=eps)
+
+        if i_episode >= MAX_EPISODE:
+            log_progress(env, reward=reward, total_reward=total_reward, delay=0.5,message=perf_message(i_episode, perf), eps=eps)
 
         if done:
             reward = -1
