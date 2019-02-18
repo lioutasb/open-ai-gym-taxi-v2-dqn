@@ -32,13 +32,13 @@ Transition = namedtuple('Transition',
 
 LEARNING_RATE = 0.01
 NUM_EPISODES = 5000
-MEMORY = 50000
-BATCH_SIZE = 128
+MEMORY = 200000
+BATCH_SIZE = 1024
 GAMMA = 0.999
 EPS_START = 0.9
-EPS_END = 0.01
-MAX_EPISODE = 50
-TARGET_UPDATE = 2
+EPS_END = 0.001
+MAX_EPISODE = 150
+TARGET_UPDATE = 3
 HIDDEN_DIM = 64
 N_ACTIONS = env.action_space.n
 N_STATES = env.observation_space.n
@@ -95,7 +95,7 @@ class DQN(torch.nn.Module):
     def forward(self, x):
         x = self.embedding(x)[:,0,:]
         x = self.layer1(x)
-        x = self.layer2(x)
+        # x = self.layer2(x)
         x = self.final(x)
         return x
 
@@ -227,7 +227,7 @@ for i_episode in range(NUM_EPISODES):
         next_state, reward, done, _ = env.step(action)
         total_reward += reward
 
-        if i_episode >= MAX_EPISODE:
+        if i_episode >= 250:
             log_progress(env, reward=reward, total_reward=total_reward, delay=0.5,message=perf_message(i_episode, perf), eps=eps)
 
         memory.push(state, action, next_state, reward, done)
@@ -236,9 +236,10 @@ for i_episode in range(NUM_EPISODES):
 
         optimize_model()
         t += 1
+
         if done:
             episode_durations.append(t)
-            # plot_durations()
+            plot_durations()
 
     score += total_reward
     perf = score/(i_episode + 1)
